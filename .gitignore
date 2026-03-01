@@ -1,0 +1,8 @@
+__pycache__/
+*.pyc
+ticker_data.csv
+.env
+venv/
+env/
+.vscode/
+.DS_Store
