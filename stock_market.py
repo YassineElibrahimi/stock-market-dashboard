@@ -1,22 +1,28 @@
 import os.path
-from datetime import timedelta
+from datetime import timedelta, date
 import yfinance as yf
 import pandas as pd
 
 
-# =================================== 1. FETCH DATA ===================================
+# =================================== FETCH & EXPLORE DATA ===================================
 def main():
     #  define tickers
     filename = "ticker_data.csv"
-    tickers = ["^GSPC", "GC=F", "SI=F"]
+    tickers = ["^GSPC", "GC=F", "SI=F","DX-Y.NYB","^XDE","MAD=X"]
 
 
-    # ------------------- ADD DATA OR UPDATE DATA IF ALREADY EXIST -------------------
-    # if the File exists, get the last date, and update if there is missing days
+    # ------------------- ADD DATA /OR UPDATE DATA IF ALREADY EXIST -------------------
+
+    # If the File exists → get the last date. If there is missing days → Update 
     if os.path.exists(filename):
-        existing    	= pd.read_csv(filename,index_col=0,parse_dates=True) #parse_dates=True
+        existing    	= pd.read_csv(filename,index_col=0,parse_dates=True)
         last_date   	= existing.index[-1].date() 
-        start_date		= last_date + timedelta(days=1) 
+        start_date		= last_date + timedelta(days=1)
+
+        if start_date > date.today():
+            print("Nothing to update.") #Start date is in the future
+            return # stop execution
+        
         new_data    	= yf.download(tickers,start=start_date,interval="1d")
 
         # if there is new_data → append to CSV. If it’s empty → skip writing to the CSV.
@@ -32,7 +38,7 @@ def main():
         else:
             print("No new data to add.")
 
-    # File does not exist → fetch all history and create a CSV file
+    # If File does not exist → fetch all history and create a CSV file
     else:
         data = yf.download(tickers, period="max", interval="1d") 
         data.columns = ['_'.join(col).strip() for col in data.columns.values]
